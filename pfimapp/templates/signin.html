@@ -1,0 +1,15 @@
+{% extends 'base.html' %} {% block content %}
+
+<main class="container">
+  <div clas="row">
+    <section class="col-md-4 offset-md-4 mt-5">
+      <form method="post" class="card card-body mt-5">
+	  <h1 class="text-center">Iniciar Sesión</h1>
+    {% csrf_token %}	
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Ingresar</button>
+  </form>
+    </section>
+  </div>
+</main>
+{% endblock %}

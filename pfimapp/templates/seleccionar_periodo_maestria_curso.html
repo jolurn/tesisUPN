@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Seleccionar Período, Maestría y Curso</title>
+    <!-- Agregar enlaces a Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+  </head>
+  <body>
+    <div class="container">
+      <h1 class="mt-4">Seleccionar Período, Maestría y Curso</h1>
+      <form method="post" class="mt-4">
+        {% csrf_token %}
+        <div class="form-group">
+          <label for="periodo">Período:</label>
+          <select name="periodo" id="periodo" class="form-control">
+            <option value="" disabled selected>Seleccionar período</option>
+            {% for periodo in periodos %}
+              <option value="{{ periodo.id }}">{{ periodo.nombre }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="maestria">Maestría:</label>
+          <select name="maestria" id="maestria" class="form-control">
+            <option value="" disabled selected>Seleccionar maestría</option>
+            {% for maestria in data %}
+              <option value="{{ maestria.id }}">{{ maestria.nombre }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="curso">Curso:</label>
+          <select name="curso" id="curso" class="form-control">
+            <option value="" disabled selected>Seleccionar curso</option>
+            {% for curso in data %}
+              <option value="{{ curso.id }}">{{ curso.nombre }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <a href="#" id="submit-button" class="btn btn-primary">Mostrar lista de alumnos</a>
+      </form>
+    </div>
+
+     <!-- ... -->
+     <script>
+      $(document).ready(function () {
+        // Llenar select de maestría con opción "Seleccionar maestría" preseleccionada
+        $('#maestria').append(
+          $('<option>', {
+            value: '',
+            text: 'Seleccionar maestría',
+            selected: true
+          })
+        )
+      
+        // Llenar select de curso con opción deshabilitada
+        $('#curso').append(
+          $('<option>', {
+            value: '',
+            text: 'Seleccionar curso',
+            disabled: true,
+            selected: true
+          })
+        )
+      
+        $('#periodo').change(function () {
+          var periodoId = $(this).val()
+          if (periodoId) {
+            $('#maestria').prop('disabled', false) // Habilitar select de maestría
+            $.ajax({
+              url: '/obtener-maestrias-por-periodo/',
+              data: {
+                periodo_id: periodoId
+              },
+              dataType: 'json',
+              success: function (response) {
+                $('#maestria').empty()
+                // Agregar la opción "Seleccionar maestría" al inicio del select
+                $('#maestria').append(
+                  $('<option>', {
+                    value: '',
+                    text: 'Seleccionar maestría',
+                    selected: true
+                  })
+                )
+                $.each(response.maestrias, function (index, maestria) {
+                  $('#maestria').append(
+                    $('<option>', {
+                      value: maestria.id,
+                      text: maestria.nombre
+                    })
+                  )
+                })
+              }
+            })
+          } else {
+            $('#maestria').empty().prop('disabled', true) // Deshabilitar select de maestría y vaciarlo
+            $('#curso').empty().prop('disabled', true) // Deshabilitar select de curso y vaciarlo
+          }
+        })
+      
+        $('#maestria').change(function () {
+          var periodoId = $('#periodo').val()
+          var maestriaId = $(this).val()
+          if (periodoId && maestriaId) {
+            $('#curso').prop('disabled', false) // Habilitar select de curso
+            $.ajax({
+              url: '/obtener-cursos-por-periodo-maestria/',
+              data: {
+                periodo_id: periodoId,
+                maestria_id: maestriaId
+              },
+              dataType: 'json',
+              success: function (response) {
+                $('#curso').empty()
+                $.each(response.cursos, function (index, curso) {
+                  $('#curso').append(
+                    $('<option>', {
+                      value: curso.id,
+                      text: curso.nombre
+                    })
+                  )
+                })
+              }
+            })
+          } else {
+            $('#curso').empty().prop('disabled', true) // Deshabilitar select de curso y vaciarlo
+          }
+        })
+        // Redireccionar al formulario de ingreso de calificaciones con los IDs del periodo, maestría y curso seleccionados
+        // Redireccionar al formulario de ingreso de calificaciones con los IDs del periodo, maestría y curso seleccionados
+        $('#submit-button').click(function () {
+          var selectedPeriodoId = $('#periodo').val()
+          var selectedMaestriaId = $('#maestria').val()
+          var selectedCursoId = $('#curso').val()
+          var url = '/ingresar_calificaciones/' + selectedPeriodoId + '/' + selectedMaestriaId + '/' + selectedCursoId + '/'
+          window.location.href = url
+        })
+      })
+    </script>
+    <!-- ... -->
+  </body>
+</html>

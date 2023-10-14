@@ -1,0 +1,13 @@
+{% extends 'base.html' %} {% block content %}
+<main class="container mt-3">
+  {% include 'detalleReportEcon.html' %}
+  <br />
+  {% comment %}
+  <div class="container-fluid">
+    <a class="btn btn-primary" href="{% url 'pdf' %}">
+      <i class="fas fa-print"></i> Imprimir
+    </a>
+  </div>
+  {% endcomment %}
+</main>
+{% endblock %}

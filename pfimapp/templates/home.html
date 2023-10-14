@@ -1,0 +1,16 @@
+{% extends 'base.html' %} {% block content %}
+<main class="container py-5">
+  <section class="card card-body">
+    <h1 class="display-1 text-center">Posgrado FIM UNI</h1>
+    <p>La Unidad de Posgrado de la Facultad de Ingeniería Mecánica, desde 1980 brinda oportunidades de especialización a los profesionales del país y del extranjero. En la actualidad cuenta con 10 maestrías, 1 doctorado y 1 programa de segunda especialización.
+Teniendo como función principal, impartir estudios de posgrado de calidad y prestigio, para ello cuenta con una apropiada cartera de Docentes, y que a la vez realiza una permanente actualización y creación de maestrías, acordes tanto a las necesidades del mercado profesional nacional como a los avances de la Ciencia y Tecnología.</p>
+    {% if user.is_authenticated %} ... {% else %}
+    <div class="text-center">
+      <a class="btn btn-primary" href="/signin/">Iniciar sesión</a>
+      <a class="btn btn-secondary ms-2" href="/signup/">Inscribirse</a>
+    </div>
+    {% endif %}
+  </section>
+</main>
+
+{% endblock %}

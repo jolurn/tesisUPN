@@ -1,0 +1,119 @@
+{% extends 'base.html' %} {% block content %}{% load static %}
+<main class="container mt-3">
+  <div class="container-fluid">
+    <header class="clearfix">
+      <div id="logo">
+        <img src="{% static 'pfimapp/img/logo.png' %}" alt="Mi imagen" />
+      </div>
+      <h2 class="mt-3">CALIFICACIONES</h2>
+      <div id="project">
+        <div>
+          <span>APELLIDOS :</span> {{ user.apellidoPaterno|upper }}
+          {{user.apellidoMaterno|upper }}
+        </div>
+        <div>
+          <span>NOMBRES :</span> {{ user.primerNombre|upper }}
+          {% if user.segundoNombre %}
+          {{ user.segundoNombre|upper }}
+          {% endif %}
+        </div>
+        <div><span>ESPECIALIDAD :</span> {{ alumno_login.maestria.nombre }}</div>
+        {% if alumno_login.codigoAlumPFIM %}
+        <div><span>CÓDIGO ALUMNO :</span> {{ alumno_login.codigoAlumPFIM }}</div>
+        {% else%}
+        <div><span>CÓDIGO ALUMNO :</span> AUN NO TIENE CÓDIGO ...</div>
+        {% endif%}
+      </div>
+    </header>
+    <div>
+      {% if user.is_authenticated and not hay_registro_nulo and not hay_estadoBoletaPag_pendiente %}
+
+      <!-- Mostrar tabla de calificaciones -->
+      <table>
+        <thead>
+          <tr>
+            <th><b>PERIODO</b></th>
+            <th><b>CÓDIGO</b></th>
+            <th><b>CURSO</b></th>
+            <th><b>CREDITO</b></th>
+            <th><b>DOCENTE</b></th>
+            <th><b>P TRABAJOS</b></th>
+            <th><b>EXAMEN P</b></th>
+            <th><b>EXAMEN F</b></th>
+            <th><b>PROMEDIO F</b></th>
+            <th><b>ESTADO</b></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for detalle in reporteAcademicos %}
+          <tr>
+            <td>{{ detalle.seccion.periodo.codigo }}</td>
+            <td>{{ detalle.seccion.curso.codigo }}</td>
+            <td>{{ detalle.seccion.curso.nombre }}</td>
+            <td>{{ detalle.seccion.curso.credito }}</td>
+            <td>{{ detalle.seccion.docente.usuario.nombre_completos }}</td>
+            {% if detalle.promedioTrabajos >= 12 %}
+            <td class="letraAzul"><b>{{ detalle.promedioTrabajos }}</b></td>
+            {% else %}
+            <td class="letraRoja">
+              <b>{{ detalle.promedioTrabajos }}</b>
+            </td>
+            {% endif %} {% if detalle.examenParcial >= 12 %}
+            <td class="letraAzul"><b>{{ detalle.examenParcial }}</b></td>
+            {% else %}
+            <td class="letraRoja">
+              <b>{{ detalle.examenParcial }}</b>
+            </td>
+            {% endif %} {% if detalle.examenFinal >= 12 %}
+            <td class="letraAzul"><b>{{ detalle.examenFinal }}</b></td>
+            {% else %}
+            <td class="letraRoja">
+              <b>{{ detalle.examenFinal }}</b>
+            </td>
+            {% endif %} {% if detalle.promedioFinal >= 12 %}
+            <td class="letraAzul"><b>{{ detalle.promedioFinal }}</b></td>
+            {% else %}
+            <td class="letraRoja">
+              <b>{{ detalle.promedioFinal }}</b>
+            </td>
+            {% endif %} {% if detalle.retirado == 0 %}
+            <td class="letraAzul"><b> ESTUDIANTE</b></td>
+            {% else %}
+            <td class="letraRoja">
+              <b>RETIRADO</b>
+            </td>
+            {% endif %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <br />
+      <div>
+        <div>NOTA:</div>
+        <div className="notice">
+          La calificación minima para aprobar el curso es 12
+        </div>
+      </div>
+
+      {% else %}
+      <p>Cancele la Boleta de Pago que tiene pendiente para poder ver sus Calificaciones ....</p>
+      {% endif %}
+      <br />
+
+    </div>
+  </div>
+
+  <br />
+
+   <div class="container-fluid mb-5">
+    <a href="{% url 'generar-pdf' %}" class="btn btn-primary">Descargar PDF <svg xmlns="http://www.w3.org/2000/svg"
+        width="16" height="16" fill="currentColor" class="bi bi-file-earmark-arrow-down" viewBox="0 0 16 16">
+        <path
+          d="M8.5 6.5a.5.5 0 0 0-1 0v3.793L6.354 9.146a.5.5 0 1 0-.708.708l2 2a.5.5 0 0 0 .708 0l2-2a.5.5 0 0 0-.708-.708L8.5 10.293V6.5z" />
+        <path
+          d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5v2z" />
+      </svg></a>
+  </div> 
+
+</main>
+{% endblock %}

@@ -1,0 +1,28 @@
+<form method="post">
+  {% csrf_token %}
+  <table>
+      <thead>
+          <tr>
+              <th>Alumno</th>
+              {% for definicion in definiciones %}
+                  <th>{{ definicion.nombre }}</th>
+              {% endfor %}
+          </tr>
+      </thead>
+      <tbody>
+          {% for alumno in alumnos %}
+              <tr>
+                  <td>{{ alumno.nombre_completo }}</td>
+                  {% for definicion in definiciones %}
+                      <td>
+                          <input type="text" name="alumno_{{ alumno.id }}_definicion_{{ definicion.id }}" value="{{
+                              alumno.detallematricula.calificacion_set.get(definicionCalificacion=definicion).nota
+                              }}">
+                      </td>
+                  {% endfor %}
+              </tr>
+          {% endfor %}
+      </tbody>
+  </table>
+  <button type="submit">Guardar</button>
+</form>
