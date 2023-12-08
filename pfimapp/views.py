@@ -1,10 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.forms import  AuthenticationForm
-<<<<<<< HEAD
-from pfimapp.models import Seccion,Curso,Periodo,Docente,ReporteEconomico,ReporteEcoConceptoPago,CustomUser,Matricula,DetalleMatricula,Alumno,Sede,Maestria,TipoDocumento,EstadoCivil
-=======
-from pfimapp.models import Periodo,DetalleMatricula,ReporteEconomico,ReporteEcoConceptoPago,CustomUser,Matricula,DetalleMatricula,Alumno,Sede,Maestria,TipoDocumento,EstadoCivil
->>>>>>> 50410a50273e667554ed63abfad5f04776b3cf62
+from pfimapp.models import Curso,Docente,Periodo,DetalleMatricula,ReporteEconomico,ReporteEcoConceptoPago,CustomUser,Matricula,DetalleMatricula,Alumno,Sede,Maestria,TipoDocumento,EstadoCivil
+
 from django.contrib.auth import login, logout, authenticate
 from django.urls import reverse_lazy
 from django.contrib.auth.decorators import login_required
@@ -33,10 +30,10 @@ from django.conf import settings
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 
-<<<<<<< HEAD
+
 from django.http import JsonResponse
 
-=======
+
 from django.contrib.admin.views.decorators import staff_member_required
 
 from django.http import JsonResponse
@@ -88,6 +85,96 @@ def admin_login(request):
         error_message = ''
 
     return render(request, 'admin_login.html', {'error_message': error_message})
+
+def docente_login(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        user = authenticate(request, email=email, password=password)
+
+        if user is not None:
+            try:
+                docente = Docente.objects.get(usuario=user)
+                # Si el usuario autenticado es un docente, permitir el inicio de sesión
+                login(request, user)
+                # Redirigir a la página para seleccionar opciones antes de cargar calificaciones
+                return redirect('cargar_calificaciones')
+            except Docente.DoesNotExist:
+                error_message = 'Usuario no autorizado para ingresar calificaciones.'
+        else:
+            error_message = 'Correo electrónico o contraseña incorrectos'
+    else:
+        error_message = ''
+
+    return render(request, 'docente_login.html', {'error_message': error_message})
+
+from django.db.models import Count
+@staff_member_required
+def cargar_calificaciones(request):
+    usuario_docente = request.user
+
+    try:
+        # Obtener el docente relacionado con el usuario
+        docente = Docente.objects.get(usuario=usuario_docente)
+
+        # Obtener las secciones relacionadas con el docente
+        secciones_docente = Seccion.objects.filter(docente=docente)
+
+        # Obtener los periodos a partir de las secciones
+        periodos = Periodo.objects.filter(id__in=secciones_docente.values('periodo'))
+
+        # Filtrar los periodos para incluir solo aquellos con al menos un alumno matriculado
+        periodos_con_alumnos = periodos.annotate(num_matriculados=Count('seccion__matricula__alumno')).filter(num_matriculados__gt=0)
+
+        context = {'periodos': periodos_con_alumnos}
+
+        return render(request, 'carga_calificaciones.html', context)
+
+    except Docente.DoesNotExist:
+        # Manejar el caso en que el usuario no esté asociado a un docente
+        # Puedes redirigir a una página de error o hacer lo que sea necesario
+        return render(request, 'error.html')
+
+def obtener_maestrias_y_cursos(request):
+    if request.method == 'GET':
+        periodo_id = request.GET.get('periodo_id')
+
+        # Obtener el usuario del docente que hizo login
+        usuario_docente = request.user
+
+        try:
+            # Obtener el docente relacionado con el usuario
+            docente = Docente.objects.get(usuario=usuario_docente)
+
+            # Obtener las secciones relacionadas con el docente para el periodo seleccionado
+            secciones = Seccion.objects.filter(
+                docente=docente,
+                periodo__id=periodo_id
+            ).distinct()
+
+            # Obtener maestrías y cursos de las secciones sin duplicados y con alumnos matriculados
+            maestrias_set = set()
+            cursos_set = set()
+
+            for seccion in secciones:
+                num_alumnos_matriculados = Matricula.objects.filter(seccion=seccion).count()
+
+                if num_alumnos_matriculados > 0:
+                    maestrias_set.add((seccion.maestria.id, seccion.maestria.nombre))
+                    cursos_set.add((seccion.curso.id, seccion.curso.nombre))
+
+            # Convertir los conjuntos a listas
+            maestrias = [{'id': id, 'nombre': nombre} for id, nombre in maestrias_set]
+            cursos = [{'id': id, 'nombre': nombre} for id, nombre in cursos_set]
+
+            response_data = {'maestrias': maestrias, 'cursos': cursos}
+            return JsonResponse(response_data)
+
+        except Docente.DoesNotExist:
+            return JsonResponse({'error': 'Docente no encontrado'})
+
+    else:
+        return JsonResponse({'error': 'Método no permitido'})
 
 @staff_member_required
 def admin_dashboard(request):
@@ -227,8 +314,6 @@ def reporte_calificaciones(request):
         'alumno_id': alumno_id,
     })
 
-
->>>>>>> 50410a50273e667554ed63abfad5f04776b3cf62
 def home(request):
     return render(request,'home.html')
 
@@ -440,121 +525,34 @@ def generar_pdf(request):
     response.write(pdf)
     return response
 
-<<<<<<< HEAD
-def seleccionar_periodo_maestria_curso(request):
-    # Verificar si el usuario está autenticado y es un docente
-    try:
-        docente = Docente.objects.get(usuario=request.user)
-    except Docente.DoesNotExist:
-        # Si el usuario autenticado no es un docente, mostrar un mensaje de error
-        return render(request, 'error_no_docente.html')
-
-    # Obtener todos los periodos
-    secciones = Seccion.objects.filter(docente=docente)
-
-    # Obtener los períodos relacionados con las secciones
-    periodos = Periodo.objects.filter(id__in=secciones.values_list('periodo', flat=True))
-
-    # Obtener todas las maestrías relacionadas con las secciones
-    maestrias = Maestria.objects.filter(id__in=secciones.values_list('maestria', flat=True))
-
-    # Obtener todos los cursos relacionados con las secciones
-    cursos = Curso.objects.filter(id__in=secciones.values_list('curso', flat=True))
-
-
-    return render(request, 'seleccionar_periodo_maestria_curso.html', {
-        'periodos': periodos,
-        'maestrias': maestrias,
-        'cursos': cursos,
-    })
-
 def guardar_calificaciones(request):
     if request.method == 'POST':
         periodo_id = request.POST.get('periodo_id')
         maestria_id = request.POST.get('maestria_id')
-        curso_id = request.POST.get('curso_id')
-
-        # Procesar el formulario enviado por el docente con las calificaciones ingresadas
-        alumnos_matriculados = Alumno.objects.filter(
-            matricula__seccion__periodo_id=periodo_id,
-            matricula__seccion__maestria_id=maestria_id,
-            matricula__seccion__curso_id=curso_id
-        ).distinct()
+        curso_id = request.POST.get('curso_id')        
         
-        for matricula in alumnos_matriculados:
-            calificacion = float(request.POST.get(f'calificacion_{matricula.id}', 0))
-            detalle_matricula, _ = DetalleMatricula.objects.get_or_create(matricula=matricula)
-            detalle_matricula.nota = calificacion
-            detalle_matricula.save()
+        # Obtener el primer objeto de Seccion en el conjunto de consultas
+        docente_seccion = Seccion.objects.filter(
+            periodo_id=periodo_id,
+            maestria_id=maestria_id,
+            curso_id=curso_id
+        ).first()
 
-        # Redireccionar a la vista 'ingresar_calificaciones' nuevamente
-        return redirect('ingresar_calificaciones')
+        if docente_seccion:
+            # Redireccionar a la vista 'editar_notas' con el ID de la sección
+            return redirect('editar_notas', seccion_id=docente_seccion.id)
 
-    # Si el método es GET, mostrar el formulario para ingresar calificaciones
-    return render(request, 'ingresar_calificaciones.html', {
-        'alumnos_matriculados': alumnos_matriculados,
-    })
-
-def ingresar_calificaciones(request, periodo_id, maestria_id, curso_id):
-    # Obtener la lista de alumnos matriculados para el período, maestría y curso seleccionados
-    alumnos_matriculados = Alumno.objects.filter(
-        matricula__seccion__periodo_id=periodo_id,
-        matricula__seccion__maestria_id=maestria_id,
-        matricula__seccion__curso_id=curso_id
-    ).distinct()
-
-    if request.method == 'POST':
-        # Procesar el formulario enviado por el docente con las calificaciones ingresadas
-        for matricula in alumnos_matriculados:
-            calificacion = float(request.POST.get(f'calificacion_{matricula.id}', 0))
-            detalle_matricula, _ = DetalleMatricula.objects.get_or_create(matricula=matricula)
-            detalle_matricula.nota = calificacion
-            detalle_matricula.save()
-
-        # Redireccionar a otra vista después de guardar las calificaciones
-        return redirect('nombre_de_la_vista')  # Cambiar 'nombre_de_la_vista' por el nombre de la vista a la que deseas redireccionar
-   
-    return render(request, 'ingresar_calificaciones.html', {
-        'alumnos_matriculados': alumnos_matriculados,
-    })
-
-def get_maestrias(request):
-    if request.method == 'GET':
-        periodo_id = request.GET.get('periodo_id')
-        # Lógica para obtener las maestrías asociadas al período
-        
-        if periodo_id:
-            maestrias = Maestria.objects.filter(seccion__periodo_id=periodo_id).distinct()            
-            data = [{'id': maestria.id, 'nombre': maestria.nombre} for maestria in maestrias]
-        else:
-            data = []
-
-        return JsonResponse({'maestrias': data}, safe=False)
-    else:
-        return JsonResponse([], safe=False)
-    
-def get_cursos(request):
-    if request.method == 'GET':
-        periodo_id = request.GET.get('periodo_id')
-        maestria_id = request.GET.get('maestria_id')
-        
-        # Lógica para obtener los cursos asociados al período y la maestría seleccionados
-        if periodo_id and maestria_id:
-            cursos = Curso.objects.filter(seccion__periodo_id=periodo_id, seccion__maestria_id=maestria_id).distinct()
-            data = [{'id': curso.id, 'nombre': curso.nombre} for curso in cursos]
-        else:
-            data = []        
-        return JsonResponse({'cursos': data}, safe=False)
-    else:
-        return JsonResponse([], safe=False)
-
+    # Si el método es GET o no se encontró la sección, mostrar el formulario para ingresar calificaciones
+    return render(request, 'editar_notas.html')
 
 from django.shortcuts import render
 from .models import Seccion, DetalleMatricula, DefinicionCalificacion, Calificacion
 
 def editar_notas(request, seccion_id):
+    
     seccion = Seccion.objects.get(pk=seccion_id)
     alumnos = seccion.matricula_set.all()
+    
     definiciones = DefinicionCalificacion.objects.filter(seccion=seccion)
 
     if request.method == 'POST':
@@ -567,17 +565,44 @@ def editar_notas(request, seccion_id):
                 calificacion.nota = request.POST.get(f'alumno_{alumno.id}_definicion_{definicion.id}')
                 calificacion.save()
 
-        # Calcular notas finales
-        for alumno in alumnos:
-            detalle_matricula = DetalleMatricula.objects.get(matricula=alumno, seccion=seccion)
-            detalle_matricula.calcular_nota_final()
-
+            # Calcular notas finales
+            for alumno in alumnos:
+                detalle_matricula = DetalleMatricula.objects.get(matricula=alumno, seccion=seccion)
+                detalle_matricula.calcular_nota_final()
+            
     return render(request, 'editar_nota.html', {
         'seccion': seccion,
         'alumnos': alumnos,
         'definiciones': definiciones,
     })
-=======
+
+# Esta vista procesará las actualizaciones de calificaciones vía AJAX
+def actualizar_calificacion(request):
+    if request.method == 'GET':
+        # Procesar los valores enviados desde la solicitud GET
+        input_name = request.GET.get('input_name')
+
+        # Extraer alumno_id y definicion_id de input_name (debes implementar esta lógica)
+        parts = input_name.split('_')
+        alumno_id = parts[1]  # Asumiendo que el alumno_id es el segundo componente
+        definicion_id = parts[3]  # Asumiendo que el definicion_id es el cuarto componente
+
+        # Buscar todas las calificaciones en la base de datos para el alumno y definición especificados
+        calificaciones = Calificacion.objects.filter(
+            detalle_matricula__matricula__id=alumno_id,
+            definicionCalificacion__id=definicion_id
+        )
+
+        # Crear una lista de notas de todas las calificaciones encontradas
+        notas = [calificacion.nota for calificacion in calificaciones]        
+        return JsonResponse({'mensaje': 'Calificaciones obtenidas exitosamente.', 'notas': notas})
+
+    return JsonResponse({'error': 'Solicitud no válida.'})
+
+
+
+
+
 # pdf de administrador
 
 @login_required
@@ -920,4 +945,4 @@ def generar_pdf_boleta_matricula(request):
     buffer.close()
     response.write(pdf)
     return response
->>>>>>> 50410a50273e667554ed63abfad5f04776b3cf62
+

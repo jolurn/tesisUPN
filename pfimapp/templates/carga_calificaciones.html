@@ -1,0 +1,142 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Docente Selección de Periodo y Curso</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/estilos.css' %}" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <div class="dashboard-header container">
+        <h1 class="dashboard-title">Docente Selecciona Periodo y Curso</h1>
+      </div>
+
+      <div class="container">
+        <form method="POST" action="{% url 'guardar_calificaciones' %}" class="mb-3" id="calificaciones-form">
+          {% csrf_token %}
+          <input type="hidden" name="periodo_id" id="periodo_id">
+          <input type="hidden" name="maestria_id" id="maestria_id">
+          <input type="hidden" name="curso_id" id="curso_id">
+
+          <div class="form-group">
+            <label for="periodo">Periodo:</label>
+            <select id="periodo" name="periodo" class="form-control">
+              <option value="">Seleccionar periodo</option>
+              {% for periodo in periodos %}
+                <option value="{{ periodo.id }}">{{ periodo.codigo }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Sección de selección de maestría -->
+          <div class="form-group">
+            <label for="maestria">Maestría:</label>
+            <select id="maestria" name="maestria" class="form-control">
+              <option value="">Seleccionar maestría</option>
+            </select>
+          </div>
+
+          <!-- Sección de selección de curso -->
+          <div class="form-group">
+            <label for="curso">Curso:</label>
+            <select id="curso" name="curso" class="form-control">
+              <option value="">Seleccionar curso</option>
+            </select>
+          </div>
+
+          <!-- Botón para enviar formulario -->
+          <button type="button" id="submit-btn" class="btn btn-primary" disabled>Ir a Ingresar Calificaciones</button>
+          <a href="/logout" class="btn btn-danger">Cerrar sesión</a>
+        </form>
+      </div>
+    </div>
+    <!-- Script AJAX para cargar dinámicamente maestrías y cursos -->
+    <script>
+      $(document).ready(function () {
+        $('#periodo').change(function () {
+          var periodoId = $(this).val()
+          if (periodoId) {
+            $.ajax({
+              url: '/obtener-maestrias-y-cursos/',
+              data: {
+                periodo_id: periodoId
+              },
+              dataType: 'json',
+              success: function (response) {
+                // Llenar las opciones de maestría
+                $('#maestria').empty()
+                $.each(response.maestrias, function (index, maestria) {
+                  $('#maestria').append(
+                    $('<option>', {
+                      value: maestria.id,
+                      text: maestria.nombre
+                    })
+                  )
+                })
+      
+                // Llenar las opciones de curso
+                $('#curso').empty()
+                $.each(response.cursos, function (index, curso) {
+                  $('#curso').append(
+                    $('<option>', {
+                      value: curso.id,
+                      text: curso.nombre
+                    })
+                  )
+                })
+              }
+            })
+          } else {
+            // Limpiar las opciones de maestría y curso si no se selecciona un periodo
+            $('#maestria').empty()
+            $('#curso').empty()
+          }
+        })
+      
+        // Manejar clic en el botón de enviar formulario
+      
+        // Función para comprobar y habilitar/deshabilitar el botón
+        function checkSelection() {
+          var periodoId = $('#periodo').val()
+          var maestriaId = $('#maestria').val()
+          var cursoId = $('#curso').val()
+      
+          if (periodoId) {
+            $('#submit-btn').prop('disabled', false)
+            // Resto del código...
+          } else {
+            $('#submit-btn').prop('disabled', true)
+          }
+        }
+      
+        // Llama a la función cuando cambia cualquier select
+        $('#periodo, #maestria, #curso').change(checkSelection)
+      
+        // Llama a la función cuando la página se carga
+        checkSelection()
+      
+        // Función para manejar clic en el botón de enviar formulario
+        $('#submit-btn').click(function () {
+          var periodoId = $('#periodo').val()
+          var maestriaId = $('#maestria').val()
+          var cursoId = $('#curso').val()
+      
+          if (periodoId && maestriaId && cursoId) {
+            // Actualiza los campos ocultos del formulario
+            $('#periodo_id').val(periodoId);
+            $('#maestria_id').val(maestriaId);
+            $('#curso_id').val(cursoId);
+            
+            // Envía el formulario
+            $('#calificaciones-form').submit();
+          } else {
+            alert('Por favor, seleccione periodo, maestría y curso antes de continuar.')
+          }
+        })
+      })
+    </script>
+  </body>
+</html>

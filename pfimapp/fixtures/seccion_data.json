@@ -1,0 +1,9 @@
+[
+  {
+    "model":"pfimapp.EstadoCivil",
+    "pk":1,
+    "fields":{
+      "nombre": ""
+    }
+  }
+]

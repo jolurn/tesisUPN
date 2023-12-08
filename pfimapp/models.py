@@ -234,15 +234,6 @@ class Alumno(models.Model):
     fechaModificado = models.DateField(null=True, blank=True, auto_now=True)    
     ipUsuario = models.CharField(null=True, default=s.getsockname()[0], blank=True, max_length=100)
     usuarioPosgradoFIM = models.CharField(null=True, blank=True, max_length=200)
-<<<<<<< HEAD
-
-    def nombre_completo(self):            
-        if self.usuario.segundoNombre:
-            return "{} {} {} {}, {}".format(self.usuario.apellidoPaterno, self.usuario.apellidoMaterno, self.usuario.primerNombre, self.usuario.segundoNombre, self.maestria.codigo)
-        else:
-            return "{} {} {}".format(self.usuario.apellidoPaterno, self.usuario.apellidoMaterno, self.usuario.primerNombre, self.maestria.codigo)
-
-=======
     
     def nombre_completo(self):
         if self.usuario.segundoNombre:
@@ -250,7 +241,7 @@ class Alumno(models.Model):
         else:
             return "{} {} {}".format(self.usuario.apellidoPaterno, self.usuario.apellidoMaterno, self.usuario.primerNombre)
         
->>>>>>> 50410a50273e667554ed63abfad5f04776b3cf62
+
     def __str__(self):
         return self.nombre_completo()
 
@@ -359,27 +350,6 @@ class Seccion(models.Model):
     class Meta:
         verbose_name_plural = "Secciones"
 
-# class DetalleSeccion(models.Model):
-#     seccion = models.ForeignKey(Seccion, on_delete=models.CASCADE)
-#     tipoCalificacion = models.ForeignKey(TipoCalificacion, null=True, on_delete=models.SET_NULL)    
-#     estado = models.CharField(max_length=1, choices=ESTADO_OFERTA, default='A')
-#     fechaRegistro = models.DateField(default=timezone.now)
-#     fechaModificado = models.DateField(null=True, blank=True, auto_now=True)    
-#     ipUsuario = models.CharField(null=True, default=s.getsockname()[0], blank=True, max_length=100)
-#     usuarioPosgradoFIM = models.CharField(null=True, blank=True, max_length=200)
-
-#     def __str__(self):
-        
-#         maestria = self.seccion.maestria
-#         curso = self.seccion.curso
-#         docente = self.seccion.docente.usuario
-#         periodo = self.seccion.periodo
-
-#         return f"{periodo.codigo}/ {maestria.codigo}/ {curso.codigo}/ Docente: {docente}/ {self.tipoCalificacion}"
-
-#     class Meta:
-#         verbose_name_plural = "Detalle Seccion"
-
 class Matricula(models.Model):
     alumno = models.ForeignKey(Alumno, null=True, on_delete=models.SET_NULL)
     seccion = models.ManyToManyField(Seccion, through='DetalleMatricula', blank=True,)    
@@ -451,13 +421,14 @@ class Calificacion(models.Model):
     definicionCalificacion = models.ForeignKey(DefinicionCalificacion, on_delete=models.CASCADE)
     nota = models.FloatField(null=True)     
     fecha_calificacion = models.DateField(default=timezone.now)
-   
-    def __str__(self):
-        alumno = self.matricula.alumno
-        maestria = self.matricula.seccion.maestria
-        curso = self.matricula.seccion.curso
-        docente = self.matricula.seccion.docente
-        s
+    
+    
+    def __str__(self):        
+        detalle_matricula = self.detalle_matricula
+        alumno = detalle_matricula.matricula.alumno
+        maestria = detalle_matricula.seccion.maestria
+        curso = detalle_matricula.seccion.curso
+        docente = detalle_matricula.seccion.docente
         return f"Calificación de {alumno} en {maestria} / {curso} / {docente} / Nota: {self.nota})"
 
     class Meta:

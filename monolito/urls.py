@@ -24,6 +24,7 @@ urlpatterns = [
     path('', views.home, name='home'),
     path('signup/', views.signup, name='signup'),
     path('adminLogin/', views.admin_login, name='admin_login'),
+    path('docenteLogin/', views.docente_login, name='docente_login'),
 
     path('adminDashboard/', views.admin_dashboard, name='admin_dashboard'),
     path('reporte-calificaciones/', views.reporte_calificaciones, name='reporte_calificaciones'),
@@ -49,15 +50,12 @@ urlpatterns = [
     path('generar_pdf_boleta_matricula/', views.generar_pdf_boleta_matricula, name='generar_pdf_boleta_matricula'),
 
     path('accounts/profile/', RedirectView.as_view(url='/', permanent=False)),
-
-    path('seleccionar_periodo_maestria_curso/', views.seleccionar_periodo_maestria_curso, name='seleccionar_periodo_maestria_curso'),
-    path('ingresar_calificaciones/<int:periodo_id>/<int:maestria_id>/<int:curso_id>/', views.ingresar_calificaciones, name='ingresar_calificaciones'),
-
-    path('obtener-maestrias-por-periodo/', views.get_maestrias, name='get_maestrias'),
-    path('obtener-cursos-por-periodo-maestria/', views.get_cursos, name='get_cursos'),
+    
     path('guardar_calificaciones/', views.guardar_calificaciones, name='guardar_calificaciones'),
 
     path('editar_notas/<int:seccion_id>/', views.editar_notas, name='editar_notas'),
+    path('actualizar_calificacion/', views.actualizar_calificacion, name='actualizar_calificacion'),    
+    path('cargar_calificaciones/', views.cargar_calificaciones, name='cargar_calificaciones'),
+    path('obtener-maestrias-y-cursos/', views.obtener_maestrias_y_cursos, name='obtener_maestrias_y_cursos'),
 
-      
 ]
