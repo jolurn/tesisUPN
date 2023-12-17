@@ -279,7 +279,8 @@ admin.site.register(ReporteEconomico, ReporteEconomicoAdmin)
 class DetalleMatriculaAdmin(admin.TabularInline):
     model = DetalleMatricula
     extra = 1
-    # autocomplete_fields = ['evaluacion']
+    
+    autocomplete_fields = ['seccion']
     readonly_fields = ('fechaRegistro', 'fechaModificado', 'usuarioPosgradoFIM', 'ipUsuario')
 
     def save_model(self, request, obj, form, change):

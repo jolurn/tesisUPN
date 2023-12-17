@@ -229,6 +229,7 @@ class Alumno(models.Model):
     codigoUniPreGrado = models.CharField(max_length=10, null=True, blank=True)
     codigoAlumPFIM = models.CharField(max_length=15, null=True, blank=True)
     estadoAcademico = models.ForeignKey(EstadoAcademico, null=True, on_delete=models.SET_NULL)
+    sede = models.ForeignKey(Sede, null=True, on_delete=models.SET_NULL)
     estado = models.CharField(max_length=1, choices=ESTADO_OFERTA, default='A')
     fechaRegistro = models.DateField(default=timezone.now)
     fechaModificado = models.DateField(null=True, blank=True, auto_now=True)    
@@ -389,8 +390,7 @@ class Matricula(models.Model):
 
 class DetalleMatricula(models.Model):
     matricula = models.ForeignKey(Matricula, null=True, on_delete=models.SET_NULL) # revisar
-    seccion = models.ForeignKey(Seccion, null=True, on_delete=models.SET_NULL) # revisar
-    nota_final = models.FloatField(null=True, blank=True)     
+    seccion = models.ForeignKey(Seccion, null=True, on_delete=models.SET_NULL) # revisar      
     retirado = models.BooleanField(default=False)
     estado = models.CharField(max_length=1, choices=ESTADO_OFERTA, default='A')
     fechaRegistro = models.DateField(default=timezone.now)
@@ -406,12 +406,12 @@ class DetalleMatricula(models.Model):
         alumno = self.matricula.alumno.usuario
         return f"{alumno.apellidoPaterno} {alumno.apellidoMaterno}, {curso}, {periodo}"
     
-    def calcular_nota_final(self):
+    # def calcular_nota_final(self):
         #calificaciones # referencia inversa
         # for calificacion
         # sumatoria ( calificacion.definicionCalificacion.porcentaje * calificacion.nota) /100
         #self.nota_final = resultasdo
-        pass
+        # pass
 
     class Meta:
         verbose_name_plural = "Detalle de Matriculas"

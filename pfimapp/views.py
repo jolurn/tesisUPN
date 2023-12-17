@@ -65,7 +65,7 @@ def obtener_alumnos_por_periodo(request):
 @login_required
 def obtener_alumnos_por_sede(request):
     sede_id = request.GET.get('sede_id')
-    alumnos = Alumno.objects.filter(usuario__sede_id=sede_id, estado="A").order_by('usuario__apellidoPaterno')
+    alumnos = Alumno.objects.filter(sede_id=sede_id, estado="A").order_by('usuario__apellidoPaterno')
     alumnos_list = [{'id': alumno.id, 'nombre_completo': alumno.usuario.nombre_completos()} for alumno in alumnos]
     return JsonResponse({'alumnos': alumnos_list})
 
@@ -192,7 +192,9 @@ def admin_dashboard(request):
 
 @login_required
 def generar_reporte_boleta_matricula(request):
-    periodos = Periodo.objects.filter(matricula__isnull=False).distinct()
+    # Obtener todos los periodos asociados a las matrículas existentes
+    periodos = Periodo.objects.filter(seccion__matricula__isnull=False).distinct()
+
     alumnos = Alumno.objects.all()
     
     periodo_id = request.POST.get('periodo_matricula')
@@ -210,9 +212,7 @@ def generar_reporte_boleta_matricula(request):
             
         if alumno_id:
             detalleAcademico = detalleAcademico.filter(matricula__alumno_id=alumno_id).distinct()
-
-        print("detalleAcademico: ", detalleAcademico)
-    
+       
     boletas_disponibles = detalleAcademico.exists()
 
     contexto = {
@@ -243,8 +243,8 @@ def registro_pagos(request):
         detalleDePago = ReporteEcoConceptoPago.objects.all()
 
         if sede_id:
-            detalleDePago = detalleDePago.filter(reporteEconomico__alumno__usuario__sede_id=sede_id)            
-            alumnos = alumnos.filter(id=alumno_id, usuario__sede_id=sede_id)
+            detalleDePago = detalleDePago.filter(reporteEconomico__alumno__sede_id=sede_id)            
+            alumnos = alumnos.filter(id=alumno_id, sede_id=sede_id)
 
         if alumno_id:
             detalleDePago = detalleDePago.filter(reporteEconomico__alumno_id=alumno_id).distinct()
@@ -277,25 +277,28 @@ def reporte_calificaciones(request):
 
     sede_id = request.POST.get('sede')
     alumno_id = request.POST.get('alumno')
-
+       
     detalleAcademico = DetalleMatricula.objects.none()  # Crear un queryset vacío
 
     if sede_id or alumno_id:
-                
-        # Aplicar los filtros solo si se proporciona al menos uno de los parámetros
-        detalleAcademico = DetalleMatricula.objects.all()
-
+        detalleAcademico = DetalleMatricula.objects.prefetch_related(
+        'calificacion_set',
+        'matricula__alumno__usuario',
+        'seccion__periodo',
+        'seccion__maestria',
+        'seccion__curso',
+        'seccion__docente').filter(calificacion__isnull=False)
+        
         if sede_id:
-            detalleAcademico = detalleAcademico.filter(matricula__alumno__usuario__sede_id=sede_id).order_by(F('seccion__periodo__codigo'))
-            # detalleAcademico = detalleAcademico.filter(matricula__alumno__usuario__sede_id=sede_id)
-            alumnos = alumnos.filter(id=alumno_id, usuario__sede_id=sede_id)
+            detalleAcademico = detalleAcademico.filter(matricula__alumno__sede_id=sede_id).order_by(F('seccion__periodo__codigo'))
+            alumnos = alumnos.filter(id=alumno_id, sede_id=sede_id)
 
         if alumno_id:
             detalleAcademico = detalleAcademico.filter(matricula__alumno_id=alumno_id).distinct()
 
     # Verificar si hay resultados
     resultados_disponibles = detalleAcademico.exists()
-    
+
     usuario_actual = request.user
     alumno_actual = None
 
@@ -566,9 +569,9 @@ def editar_notas(request, seccion_id):
                 calificacion.save()
 
             # Calcular notas finales
-            for alumno in alumnos:
-                detalle_matricula = DetalleMatricula.objects.get(matricula=alumno, seccion=seccion)
-                detalle_matricula.calcular_nota_final()
+            # for alumno in alumnos:
+            #     detalle_matricula = DetalleMatricula.objects.get(matricula=alumno, seccion=seccion)
+            #     detalle_matricula.calcular_nota_final()
             
     return render(request, 'editar_nota.html', {
         'seccion': seccion,
@@ -609,31 +612,35 @@ def actualizar_calificacion(request):
 def generar_pdf_administrativo(request):
     sede_id = request.GET.get('sede')
     alumno_id = request.GET.get('alumno')
-    
+
     image_path = os.path.join(settings.STATICFILES_DIRS[0], 'pfimapp/img/logo.png')
     logo = Image.open(image_path)
 
-    detalleAcademico = DetalleMatricula.objects.none()  # Crear un queryset vacío
+    detalleAcademico = DetalleMatricula.objects.none()
+
+    detalleAcademico = DetalleMatricula.objects.prefetch_related(
+    'calificacion_set',
+    'matricula__alumno__usuario',
+    'seccion__periodo',
+    'seccion__maestria',
+    'seccion__curso',
+    'seccion__docente').filter(calificacion__isnull=False)
 
     if sede_id or alumno_id:
-        # Aplicar los filtros solo si se proporciona al menos uno de los parámetros
-        detalleAcademico = DetalleMatricula.objects.all()
-
-        if sede_id:
-            detalleAcademico = detalleAcademico.filter(matricula__alumno__usuario__sede_id=sede_id)
+        detalleAcademico = detalleAcademico.filter(matricula__alumno__sede_id=sede_id).order_by(F('seccion__periodo__codigo'))
 
         if alumno_id:
             detalleAcademico = detalleAcademico.filter(matricula__alumno_id=alumno_id).distinct()
-    
-    # Create the HttpResponse headers with PDF
+
+    # Crear la respuesta PDF
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename=PosgradoFIM-student-report.pdf'
 
-    # Create the PDF object, using the BytesIO object as its "file."
+    # Crear el objeto PDF usando el objeto BytesIO como su "archivo".
     buffer = BytesIO()
     c = canvas.Canvas(buffer, pagesize=A4)
 
-    # Draw the image in the header
+    # Dibujar la imagen en el encabezado
     logo_width, logo_height = logo.size
     aspect_ratio = logo_height / logo_width
     logo_width = 250
@@ -645,14 +652,13 @@ def generar_pdf_administrativo(request):
     c.drawString(30, 905, 'Datos del Reporte Académico')
 
     c.setFont('Helvetica', 12)
-    user_name = detalleAcademico.first().matricula.alumno.nombre_completo()  # Obtener el nombre completo del primer detalle
+    user_name = detalleAcademico.first().matricula.alumno.nombre_completo()
     c.drawString(30, 705, f'ALUMNO: {user_name.upper()}')
 
-    c.setFont('Helvetica', 10)  # Cambiar la fuente a 'Helvetica' y el tamaño de fuente a 10
-    especialidad = detalleAcademico.first().seccion.maestria.nombre  # Obtener el nombre de la maestría del primer detalle
+    c.setFont('Helvetica', 10)
+    especialidad = detalleAcademico.first().seccion.maestria.nombre
     c.drawString(30, 685, f'ESPECIALIDAD: {especialidad}')
 
-    # Use today() method to get current date
     current_date = datetime.today().strftime('%d/%m/%Y')
     c.drawString(480, 705, current_date)
     c.line(460, 702, 560, 702)
@@ -663,54 +669,68 @@ def generar_pdf_administrativo(request):
     styleBH.alignment = TA_CENTER
     styleBH.fontSize = 10
 
-    # Table data
-    header = ['Periodo', 'Código', 'Curso', 'Crédito', 'Docente', 'Promedio', 'Retirado']
-    data = [header,]
-    high = 650
+    # Crear encabezado dinámico para las calificaciones
+    header = ['Periodo', 'Código', 'Curso', 'Crédito', 'Docente']
+    primer_detalle = detalleAcademico.first()
+    if primer_detalle:
+        for calificacion in primer_detalle.calificacion_set.all():
+            header.append(calificacion.definicionCalificacion.nombre)
+        header += ['Retirado']
 
-    for detalle in detalleAcademico:
-        periodo_codigo = detalle.seccion.periodo.codigo
-        # Obtener la parte del código del período que deseas mostrar
-        periodo_parte_mostrar = '-'.join(periodo_codigo.split(' ')[0].split('-')[:3])
-    
-        student = [
-            str(periodo_parte_mostrar),
-            str(detalle.seccion.curso.codigo),
-            str(detalle.seccion.curso.nombre),
-            str(detalle.seccion.curso.credito),
-            str(detalle.seccion.docente.usuario.nombre_completos()),            
-            str(detalle.promedioFinal),
-            str(detalle.retirado),
-        ]
-        data.append(student)
-        high = high - 18
-    width, height = A4
-    table = Table(data, colWidths=[1.4 * cm,0.9 * cm, 8.5 * cm,0.9 * cm, 4.5 * cm, 1.4 *cm, 1.4*cm])
-    table.setStyle(TableStyle([
-    # Estilo de las celdas de la tabla
-        ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),  # Estilo de fuente
-        ('FONTSIZE', (0, 0), (-1, -1), 7.2),  # Tamaño de fuente
-        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),  # Color de fondo de la fila del encabezado
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),  # Color de texto de la fila del encabezado
-        ('ALIGN', (0, 0), (-1, 0), 'CENTER'),  # Alineación del texto en la fila del encabezado
-        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),  # Estilo de fuente
-        ('FONTSIZE', (0, 1), (-1, -1), 4.5),  # Tamaño de fuente
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),  # Alineación del texto en todas las celdas
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),  # Alineación vertical del texto en todas las celdas
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),  # Estilo de las líneas de la tabla
-    ]))
-    # pdf size
-    table.wrapOn(c, width, height)
-    table.drawOn(c, 30, high)
-    c.showPage() # save page
+        data = [header, ]
+        high = 650
 
-    # save pdf
-    c.save()
-    #get the value of BytesIO buffer and write response
-    pdf = buffer.getvalue()
-    buffer.close()
-    response.write(pdf)
-    return response
+        for detalle in detalleAcademico:
+            periodo_codigo = detalle.seccion.periodo.codigo
+            periodo_parte_mostrar = '-'.join(periodo_codigo.split(' ')[0].split('-')[:3])
+
+            # Crear fila de datos dinámicos
+            student = [
+                str(periodo_parte_mostrar),
+                str(detalle.seccion.curso.codigo),
+                str(detalle.seccion.curso.nombre),
+                str(detalle.seccion.curso.credito),
+                str(detalle.seccion.docente.usuario.nombre_completos())
+            ]
+
+            # Agregar valores de calificaciones dinámicas
+            for calificacion in detalle.calificacion_set.all():
+                student.append(str(calificacion.nota))
+
+            student += ['Si' if detalle.retirado else 'NO']
+
+            data.append(student)
+            high = high - 18
+
+        width, height = A4
+        table = Table(data, colWidths=[1.4 * cm, 0.9 * cm, 6 * cm, 0.9 * cm, 4.5 * cm] + [1 * cm] * len(header[5:-2]) + [1.4 * cm, 1.4 * cm])
+
+        table.setStyle(TableStyle([
+            # Estilo de las celdas de la tabla
+            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),  # Estilo de fuente
+            ('FONTSIZE', (0, 0), (-1, -1), 7.2),  # Tamaño de fuente
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),  # Color de fondo de la fila del encabezado
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),  # Color de texto de la fila del encabezado
+            ('ALIGN', (0, 0), (-1, 0), 'CENTER'),  # Alineación del texto en la fila del encabezado
+            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),  # Estilo de fuente
+            ('FONTSIZE', (0, 1), (-1, -1), 5),  # Tamaño de fuente
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),  # Alineación del texto en todas las celdas
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),  # Alineación vertical del texto en todas las celdas
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),  # Estilo de las líneas de la tabla
+        ]))
+
+        # pdf size
+        table.wrapOn(c, width, height)
+        table.drawOn(c, 30, high)
+        c.showPage()
+
+        # save pdf
+        c.save()
+        pdf = buffer.getvalue()
+        buffer.close()
+        response.write(pdf)
+        return response
+
 
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
