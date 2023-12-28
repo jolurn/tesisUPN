@@ -1,12 +1,33 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
 <head>
     <title>Dashboard Administrativo</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Racing+Sans+One&display=swap" rel="stylesheet">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dosis:wght@200;500;700;800&display=swap" rel="stylesheet">
+    
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{% static 'css/estilos.css' %}"
+      />
+    
     <style>
         body {
-            font-family: Arial, sans-serif;
+            {% comment %} font-family: Arial, sans-serif; {% endcomment %}
             padding: 20px;
         }
 
@@ -17,9 +38,9 @@
             margin-bottom: 30px;
         }
 
-        .dashboard-title {
+        {% comment %} .dashboard-title {
             font-size: 24px;
-        }
+        } {% endcomment %}
 
         .dashboard-menu {
             display: flex;
@@ -44,9 +65,19 @@
         }
 
         .dashboard-menu li:hover {
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);                                 
+        }
+        /* Estilo por defecto del ícono y el texto */
+        li a i,
+        li a span {
+        color: #333; /* Cambia esto al color predeterminado que desees */
         }
 
+        /* Estilo al pasar el ratón sobre el elemento li */
+        li:hover a i,
+        li:hover a span {
+        color: #ff724c; /* Cambia esto al color que desees cuando pases el ratón sobre el elemento */
+        }
         .dashboard-menu a {
             display: flex;
             flex-direction: column;
@@ -70,8 +101,8 @@
 </head>
 <body>
     <div class="dashboard-header">
-        <h1 class="dashboard-title">Bienvenido al Dashboard Administrativo Posgrado FIM UNI</h1>
-        <a href="/logout" class="btn btn-danger">Cerrar sesión</a>
+        <h1 class="dashboard-title">BIENVENIDO AL DASHBOARD ADMINISTRATIVO POSGRADO FIM UNI</h1>
+        <a href="/logout" class="btn btn-danger fondoRojo">Cerrar sesión</a>
     </div>
 
     <div class="container">

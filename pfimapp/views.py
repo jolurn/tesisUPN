@@ -41,6 +41,8 @@ from django.http import JsonResponse
 import re
 from django.db.models import F
 
+from django.contrib import messages
+
 def extract_year_period(period_code):
     match = re.search(r'(\d{4})-(\d)-', period_code)    
     if match:
@@ -56,7 +58,7 @@ def orden_periodo(period_code):
 @login_required
 def obtener_alumnos_por_periodo(request):
     periodo_id = request.GET.get('periodo_id')
-    alumnos = Alumno.objects.filter(matricula__seccion__periodo_id=periodo_id, estado="A").distinct()
+    alumnos = Alumno.objects.filter(matricula__seccion__periodo_id=periodo_id, estado="A").order_by('usuario__apellidoPaterno').distinct()
     
     alumnos_list = [{'id': alumno.id, 'nombre_completo': alumno.usuario.nombre_completos().upper()} for alumno in alumnos]
     
@@ -66,7 +68,7 @@ def obtener_alumnos_por_periodo(request):
 def obtener_alumnos_por_sede(request):
     sede_id = request.GET.get('sede_id')
     alumnos = Alumno.objects.filter(sede_id=sede_id, estado="A").order_by('usuario__apellidoPaterno')
-    alumnos_list = [{'id': alumno.id, 'nombre_completo': alumno.usuario.nombre_completos()} for alumno in alumnos]
+    alumnos_list = [{'id': alumno.id, 'nombre_completo': alumno.usuario.nombre_completos().upper()} for alumno in alumnos]
     return JsonResponse({'alumnos': alumnos_list})
 
 # @staff_member_required
@@ -215,6 +217,9 @@ def generar_reporte_boleta_matricula(request):
        
     boletas_disponibles = detalleAcademico.exists()
 
+    #Dividir los nombres de los alumnos por el guion
+    alumnos = [alumno.nombre_completo().split('-')[0] for alumno in alumnos]
+
     contexto = {
         'periodos': periodos,
         'detalleAcademico': detalleAcademico,
@@ -260,6 +265,9 @@ def registro_pagos(request):
     except Alumno.DoesNotExist:
         pass
     
+    #Dividir los nombres de los alumnos por el guion
+    alumnos = [alumno.nombre_completo().split('-')[0] for alumno in alumnos]
+
     return render(request, 'registro_pagos.html', {
         'detalleDePago': detalleDePago,
         'sedes': sedes,
@@ -306,7 +314,10 @@ def reporte_calificaciones(request):
         alumno_actual = Alumno.objects.get(usuario=usuario_actual)
     except Alumno.DoesNotExist:
         pass
-    
+
+    #Dividir los nombres de los alumnos por el guion
+    alumnos = [alumno.nombre_completo().split('-')[0] for alumno in alumnos]
+
     return render(request, 'reporte_calificaciones.html', {
         'detalleAcademico': detalleAcademico,
         'sedes': sedes,
@@ -326,7 +337,9 @@ def signup(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
+
             return redirect('reporteEconomico')
+
     else:
         form = CustomUserCreationForm()
     return render(request, 'signup.html', {'form': form})
@@ -400,10 +413,10 @@ def reporteAcademico(request):
 @login_required
 def reporteMatricula(request):
     try:
-        matriculas = Matricula.objects.filter(alumno__usuario=request.user, estado="A")
-    except Matricula.DoesNotExist:
+        matriculas = DetalleMatricula.objects.filter(matricula__alumno__usuario=request.user, estado="A")
+    except DetalleMatricula.DoesNotExist:
         matriculas = []
-
+    
     return render(request, 'matricula.html', {'matriculas': matriculas})
 
 
@@ -424,7 +437,6 @@ def signout(request):
     logout(request)
     return redirect('home')
 
-
 class CustomLoginView(LoginView):
     template_name = 'signin.html'
     form_class = CustomAuthenticationForm
@@ -437,15 +449,23 @@ class CustomPasswordChangeView(PasswordChangeView):
 
     def form_valid(self, form):
         response = super().form_valid(form)
-        logout(self.request)
+        messages.success(self.request, 'Contraseña cambiada exitosamente.')
         return response
+
+    def form_invalid(self, form):
+        messages.error(self.request, 'Hubo un problema al cambiar la contraseña. Su contraseña no puede ser demasiado similar a su otra información personal. Su contraseña debe contener al menos 8 caracteres. Su contraseña no puede ser una contraseña de uso común. Su contraseña no puede ser completamente numérica.')
+        return super().form_invalid(form)
+
+    def dispatch(self, request, *args, **kwargs):
+        # Aquí también podrías agregar lógica personalizada si es necesario
+        return super().dispatch(request, *args, **kwargs)
 
 @login_required
 def generar_pdf(request):
     image_path = os.path.join(settings.STATICFILES_DIRS[0], 'pfimapp/img/logo.png')
     logo = Image.open(image_path)
 
-    reporteAcademicos = DetalleMatricula.objects.filter(matricula__alumno__usuario=request.user, estado="A").order_by('seccion__periodo__codigo')
+    detalleAcademico = DetalleMatricula.objects.filter(matricula__alumno__usuario=request.user, estado="A").order_by('seccion__periodo__codigo')
            
     #Create the HttpResponse headers with PDF
     response = HttpResponse(content_type='application/pdf')
@@ -482,26 +502,35 @@ def generar_pdf(request):
         
     # Table data
     # encabezado de la tabla
-    header = [    'Periodo','Código','Curso','Crédito','Docente', 'Promedio','Retirado']
+    header = ['Periodo', 'Código', 'Curso', 'Crédito']
+    primer_detalle = detalleAcademico.first()
+    if primer_detalle:
+        for calificacion in primer_detalle.calificacion_set.all():
+            cadena_minuscula = calificacion.definicionCalificacion.nombre.lower()
+            header.append(cadena_minuscula.capitalize())
+        header += ['Retirado']
 
-    # datos de la tabla
-    data = [    header,]
+    data = [header, ]
     high = 650
-    for detalle in reporteAcademicos:
+    for detalle in detalleAcademico:
         student = [
             str(detalle.seccion.periodo.codigo),
             str(detalle.seccion.curso.codigo),
             str(detalle.seccion.curso.nombre),
             str(detalle.seccion.curso.credito),
-            str(detalle.seccion.docente.usuario.nombre_completos()),            
-            str(detalle.promedioFinal),
-            str(detalle.retirado),
+            
         ]
+        # Agregar valores de calificaciones dinámicas
+        for calificacion in detalle.calificacion_set.all():
+            student.append(str(calificacion.nota))
+
+        student += ['Si' if detalle.retirado else 'NO']
+
         data.append(student)
         high = high - 18
-    #table size
+
     width, height = A4
-    table = Table(data, colWidths=[1.4 * cm,0.9 * cm, 8.5 * cm,0.9 * cm, 4.5 * cm, 1.4 *cm, 1.4*cm])
+    table = Table(data, colWidths=[1.2 * cm, 0.9 * cm, 9.1 * cm,  0.9 * cm] + [1 * cm] * len(header[5:-2]) + [1.9 * cm, 1.2 * cm])
     table.setStyle(TableStyle([
     # Estilo de las celdas de la tabla
         ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),  # Estilo de fuente
@@ -602,10 +631,6 @@ def actualizar_calificacion(request):
 
     return JsonResponse({'error': 'Solicitud no válida.'})
 
-
-
-
-
 # pdf de administrador
 
 @login_required
@@ -616,7 +641,7 @@ def generar_pdf_administrativo(request):
     image_path = os.path.join(settings.STATICFILES_DIRS[0], 'pfimapp/img/logo.png')
     logo = Image.open(image_path)
 
-    detalleAcademico = DetalleMatricula.objects.none()
+    detalleAcademico = DetalleMatricula.objects.none().order_by('seccion__periodo__codigo')
 
     detalleAcademico = DetalleMatricula.objects.prefetch_related(
     'calificacion_set',
@@ -653,6 +678,7 @@ def generar_pdf_administrativo(request):
 
     c.setFont('Helvetica', 12)
     user_name = detalleAcademico.first().matricula.alumno.nombre_completo()
+    user_name = user_name.split('-')[0] 
     c.drawString(30, 705, f'ALUMNO: {user_name.upper()}')
 
     c.setFont('Helvetica', 10)
@@ -670,11 +696,12 @@ def generar_pdf_administrativo(request):
     styleBH.fontSize = 10
 
     # Crear encabezado dinámico para las calificaciones
-    header = ['Periodo', 'Código', 'Curso', 'Crédito', 'Docente']
+    header = ['Periodo', 'Código', 'Curso', 'Crédito']
     primer_detalle = detalleAcademico.first()
     if primer_detalle:
         for calificacion in primer_detalle.calificacion_set.all():
-            header.append(calificacion.definicionCalificacion.nombre)
+            cadena_minuscula = calificacion.definicionCalificacion.nombre.lower()
+            header.append(cadena_minuscula.capitalize())
         header += ['Retirado']
 
         data = [header, ]
@@ -689,8 +716,7 @@ def generar_pdf_administrativo(request):
                 str(periodo_parte_mostrar),
                 str(detalle.seccion.curso.codigo),
                 str(detalle.seccion.curso.nombre),
-                str(detalle.seccion.curso.credito),
-                str(detalle.seccion.docente.usuario.nombre_completos())
+                str(detalle.seccion.curso.credito),                
             ]
 
             # Agregar valores de calificaciones dinámicas
@@ -703,7 +729,7 @@ def generar_pdf_administrativo(request):
             high = high - 18
 
         width, height = A4
-        table = Table(data, colWidths=[1.4 * cm, 0.9 * cm, 6 * cm, 0.9 * cm, 4.5 * cm] + [1 * cm] * len(header[5:-2]) + [1.4 * cm, 1.4 * cm])
+        table = Table(data, colWidths=[1.2 * cm, 0.9 * cm, 9.1 * cm,  0.9 * cm] + [1 * cm] * len(header[5:-2]) + [1.9 * cm, 1.2 * cm])
 
         table.setStyle(TableStyle([
             # Estilo de las celdas de la tabla
@@ -752,7 +778,7 @@ def generar_pdf_pagos(request):
         detalleDePago = ReporteEcoConceptoPago.objects.all()
 
         if sede_id:
-            detalleDePago = detalleDePago.filter(reporteEconomico__alumno__usuario__sede_id=sede_id)
+            detalleDePago = detalleDePago.filter(reporteEconomico__alumno__sede_id=sede_id)
 
         if alumno_id:
             detalleDePago = detalleDePago.filter(reporteEconomico__alumno_id=alumno_id).distinct()
@@ -778,6 +804,7 @@ def generar_pdf_pagos(request):
 
     c.setFont('Helvetica', 12)
     user_name = detalleDePago.first().reporteEconomico.alumno.nombre_completo().upper()  # Obtener el nombre completo del primer detalle
+    user_name = user_name.split('-')[0] 
     c.drawString(30, 705, f'ALUMNO: {user_name}')
 
     c.setFont('Helvetica', 10)  # Cambiar la fuente a 'Helvetica' y el tamaño de fuente a 10
@@ -838,7 +865,7 @@ def generar_pdf_pagos(request):
     # Table size    
     width, height = A4
     table.wrapOn(c, width, height)
-    table.drawOn(c, 30, 350)  # Ajusta el valor '600' según sea necesario
+    table.drawOn(c, 30, 320)  # Ajusta el valor '600' según sea necesario
     c.showPage()  # save page
 
     # save pdf
@@ -889,6 +916,7 @@ def generar_pdf_boleta_matricula(request):
 
     c.setFont('Helvetica', 12)
     user_name = detalleAcademico.first().matricula.alumno.nombre_completo().upper()
+    user_name = user_name.split('-')[0] 
     c.drawString(30, 705, f'ALUMNO: {user_name}')
 
     c.setFont('Helvetica', 10)  # Cambiar la fuente a 'Helvetica' y el tamaño de fuente a 10

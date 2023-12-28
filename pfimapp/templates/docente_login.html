@@ -1,12 +1,32 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
 <head>
     <title>Inicio de sesión Docente</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Racing+Sans+One&display=swap" rel="stylesheet">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dosis:wght@200;500;700;800&display=swap" rel="stylesheet">
+    
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{% static 'css/estilos.css' %}"
+      />
 </head>
 <body>
-    <div class="container">
-        <h1 class="mt-5">Iniciar sesión como Docente</h1>
+    <div class="container mt-4">
+        <h1 >Iniciar sesión como Docente</h1>
 
         {% if error_message %}
             <div class="alert alert-danger mt-4" role="alert">
@@ -26,7 +46,7 @@
                 <input type="password" id="password" name="password" class="form-control" required>
             </div>
 
-            <button type="submit" class="btn btn-primary">Iniciar sesión</button>
+            <button type="submit" class="btn btn-primary fondoAzul">Iniciar sesión</button>
         </form>
     </div>
 </body>

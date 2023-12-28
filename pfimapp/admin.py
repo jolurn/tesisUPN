@@ -6,6 +6,7 @@ from django.contrib.auth.hashers import make_password
 
 class DefinicionCalificacionAdmin(admin.TabularInline):
     model = DefinicionCalificacion
+    extra = 1
 
 class SeccionAdmin(admin.ModelAdmin):    
     # Para que sea mas facil de encontrar a la hora de crear una matricula
@@ -269,7 +270,6 @@ class ReporteEconomicoAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         # request.user es el usuario autenticado en ese momento
-
         obj.usuarioPosgradoFIM = f'{request.user.apellidoPaterno} {request.user.apellidoMaterno} {request.user.primerNombre}'
         super().save_model(request, obj, form, change)
 
@@ -303,13 +303,3 @@ class MatriculaAdmin(admin.ModelAdmin):
             obj.usuarioPosgradoFIM = f"{request.user.apellidoPaterno} {request.user.apellidoMaterno} {request.user.primerNombre}"
         super().save_model(request, obj, form, change)
 
-
-# admin.site.register(Matricula, MatriculaAdmin)
-# Registro de los modelos TipoCalificacion y Evaluacion
-
-
-
-# class CalificacionAdmin(admin.ModelAdmin):
-#     list_display = ('matricula','nota', 'fecha_calificacion')
-    
-# admin.site.register(Calificacion, CalificacionAdmin)

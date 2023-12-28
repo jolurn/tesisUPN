@@ -4,16 +4,25 @@
   <head>
     <title>Registro de Pagos</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link
-      rel="stylesheet"
-      type="text/css"
-      href="{% static 'css/estilos.css' %}"
-    />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Racing+Sans+One&display=swap" rel="stylesheet">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dosis:wght@200;500;700;800&display=swap" rel="stylesheet">
+    
     <link
       rel="stylesheet"
       href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
     />
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{% static 'css/estilos.css' %}"
+      />
 
     <script>
       $(document).ready(function () {
@@ -46,8 +55,8 @@
     </script>
   </head>
   <body>
-    <div class="container">
-      <h1>Registro de Pagos</h1>
+    <div class="container mt-4">
+      <h1>REGISTRO DE PAGOS</h1>
 
       <form method="post" action="{% url 'registro_pagos' %}" class="mb-3">
         {% csrf_token %}
@@ -68,9 +77,9 @@
           </select>
         </div>
 
-        <button type="submit" class="btn btn-primary">Generar reporte</button>
+        <button type="submit" class="btn btn-primary fondoAzul">Generar reporte</button>
       </form>
-      <div class="container">
+      <div class="container-fluit">
         <header class="clearfix">
           <div id="logo">
             <img src="{% static 'pfimapp/img/logo.png' %}" alt="Mi imagen" />
@@ -103,14 +112,22 @@
           <tr>
             <td class="small-font">{{ detalle.conceptoPago }}</td>
             <td class="small-font">{{ detalle.periodo }}</td>
-            <td class="small-font">{{ detalle.monto }}</td>
-            <td class="small-font">{{ detalle.numeroRecibo }}</td>
+            <td class="small-font">{{ detalle.monto }}</td>            
+            {% if detalle.numeroRecibo == None %}
+              <td class="letraRoja">
+                <b>Falta número de recibo</b>
+              </td>
+            {% else %}
+              <td class="letraAzul">
+                <b>{{ detalle.numeroRecibo }}</b>
+              </td>
+            {% endif %}
             {% if detalle.estadoBoletaPago.id == 2 %}
-            <td class="letraRoja small-font">
+            <td class="letraRoja">
               <b>{{ detalle.estadoBoletaPago }}</b>
             </td>
             {% else %}
-            <td class="letraAzul small-font">
+            <td class="letraAzul">
               <b>{{ detalle.estadoBoletaPago }}</b>
             </td>
             {% endif %}
@@ -125,13 +142,13 @@
         <!-- Resto del código HTML -->
 
         <div class="mt-4 mb-4">
-          <a href="{% url 'admin_dashboard' %}" class="btn btn-primary"
+          <a href="{% url 'admin_dashboard' %}" class="btn btn-primary fondoAzul"
             >Regresar a Dashboard</a
           >
 
           <a
             href="{% url 'generar_pdf_pagos' %}?sede={{ sede_id }}&alumno={{ alumno_id }}"
-            class="btn btn-dark"
+            class="btn btn-danger fondoRojo"
             >Descargar PDF</a
           >
         </div>

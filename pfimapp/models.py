@@ -122,16 +122,13 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     tipoDocumento = models.ForeignKey(TipoDocumento, null=True, on_delete=models.SET_NULL)
     numeroDocumento = models.CharField(max_length=100,unique=True, error_messages={'unique': 'Este DNI ya está en uso.'})
     numeroUbigeoNacimiento = models.CharField(max_length=100)
-    direccion = models.CharField(max_length=200)
-    # codigoEgresadoUNI = models.CharField(max_length=20,null=True, blank=True)    
+    direccion = models.CharField(max_length=200)    
     primerNombre = models.CharField(max_length=100)
     segundoNombre = models.CharField(max_length=100, null=True, blank=True)
     apellidoPaterno = models.CharField(max_length=100)
     apellidoMaterno = models.CharField(max_length=100)    
     estadoCivil = models.ForeignKey(EstadoCivil, null=True, on_delete=models.SET_NULL)
-    correoUNI = models.CharField(null=True, blank=True,max_length=100)
-    # gradoEstudio = models.CharField(max_length=200)
-    # universidadProcedencia = models.CharField(max_length=200)
+    correoUNI = models.CharField(null=True, blank=True,max_length=100)    
     telefono = models.CharField(max_length=15)
     fechaNacimiento = models.DateField(null=True, blank=True)
     is_staff = models.BooleanField(default=False)
@@ -238,9 +235,9 @@ class Alumno(models.Model):
     
     def nombre_completo(self):
         if self.usuario.segundoNombre:
-            return "{} {} {} {}".format(self.usuario.apellidoPaterno, self.usuario.apellidoMaterno, self.usuario.primerNombre, self.usuario.segundoNombre)
+            return "{} {} {} {}-{}".format(self.usuario.apellidoPaterno, self.usuario.apellidoMaterno, self.usuario.primerNombre, self.usuario.segundoNombre,self.maestria.codigo)
         else:
-            return "{} {} {}".format(self.usuario.apellidoPaterno, self.usuario.apellidoMaterno, self.usuario.primerNombre)
+            return "{} {} {}-{}".format(self.usuario.apellidoPaterno, self.usuario.apellidoMaterno, self.usuario.primerNombre,self.maestria.codigo)
         
 
     def __str__(self):

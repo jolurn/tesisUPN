@@ -6,17 +6,30 @@
 
 a {
   color: #5d6975;
-  text-decoration: underline;
+  /* text-decoration: underline; */
+}
+h1{
+  font-family: 'Racing Sans One', sans-serif;
+  color: #2a2c41;
 }
 .letraAzul {
-  color: blue;
+  color: #2a2c41;
 }
 .letraRoja {
-  color: red;
+  color: #ff724c;  
+}
+.fondoAzul {
+  background-color: #2a2c41;
+  border-color: #2a2c41;
+}
+.fondoRojo{
+background-color: #ff724c;
+border-color: #ff724c;
 }
 body {
   /* font-family: "Alumni Sans", sans-serif;   */
   font-family: 'Dosis', sans-serif;
+  background-color: #f4f4f8;
 }
 
 
@@ -47,16 +60,17 @@ header {
 }
 
 h2 {
+  font-family: 'Racing Sans One', sans-serif;
   border-top: 1px solid #5d6975;
   border-bottom: 1px solid #5d6975;
-  color: #5d6975;
-  font-size: 4em;
+  color: #2a2c41;
+  font-size: 2.5em;
   line-height: 1.4em;
   font-weight: normal;
   text-align: center;
   margin: 0 0 20px 0;
   background: url("../pfimapp/img/tornillos.jpg");
-  background-size: contain;
+  background-size: contain;  
 }
 
 

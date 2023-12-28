@@ -1,14 +1,30 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
   <head>
     <title>Ingresar Calificaciones</title>
     <!-- Agregar los enlaces a los archivos de estilos de Bootstrap -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
-    <!-- Agregar el enlace al archivo de script de Bootstrap -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Racing+Sans+One&display=swap" rel="stylesheet">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dosis:wght@200;500;700;800&display=swap" rel="stylesheet">
+    
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{% static 'css/estilos.css' %}"
+      />
   </head>
   <body>
-    <div class="container">
+    <div class="container  mt-4">
       <div class="container mb-3 mt-3">
         <h1>INGRESAR CALIFICACIONES</h1>
         <strong>MAESTRIA: </strong> <span>{{seccion.maestria.nombre}}</span> <br>
@@ -39,9 +55,11 @@
             {% endfor %}
           </tbody>
         </table>
-        <button type="submit"class="btn btn-primary">Guardar</button>
-        <a href="/logout" class="btn btn-danger">Cerrar sesión</a>
-      </form>
+        <button type="submit"class="btn btn-primary fondoAzul">Guardar</button>
+        <a href="/cargar_calificaciones" class="btn btn-primary">Home</a>
+        <a href="/logout" class="btn btn-danger fondoRojo">Cerrar sesión</a>
+      </form> 
+    </br>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

@@ -17,7 +17,7 @@
           {{ user.segundoNombre|upper }}
           {% endif %}
         </div>
-        <div><span>ESPECIALIDAD :</span> {{ user.maestria.nombre }}</div>
+        <div><span>ESPECIALIDAD :</span> {{ alumno_login.maestria.nombre }}</div>
         {% if alumno_login.codigoAlumPFIM %}
         <div><span>CÓDIGO ALUMNO :</span> {{ alumno_login.codigoAlumPFIM }}</div>
         {% else%}
@@ -61,6 +61,9 @@
       </table>
 
       <br />
+      <a href="{% url 'reporteMatricula' %}" class="btn btn-danger fondoRojo"
+          >Regresar</a
+        >
     </div>
   </div>
 

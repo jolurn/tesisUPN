@@ -41,7 +41,15 @@
           <td>{{ detalle.conceptoPago }}</td>
           <td>{{ detalle.periodo }}</td>
           <td>{{ detalle.monto }}</td>
-          <td>{{ detalle.numeroRecibo }}</td>
+          {% if detalle.numeroRecibo == None %}
+            <td class="letraRoja">
+              <b>Falta número de recibo</b>
+            </td>
+          {% else %}
+            <td class="letraAzul">
+              <b>{{ detalle.numeroRecibo }}</b>
+            </td>
+          {% endif %}
           {% if detalle.estadoBoletaPago.id == 2 %}
             <td class="letraRoja">
               <b>{{ detalle.estadoBoletaPago }}</b>

@@ -4,17 +4,25 @@
   <head>
     <title>Registro de Pagos</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link
-      rel="stylesheet"
-      type="text/css"
-      href="{% static 'css/estilos.css' %}"
-    />
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Racing+Sans+One&display=swap" rel="stylesheet">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dosis:wght@200;500;700;800&display=swap" rel="stylesheet">
+    
     <link
       rel="stylesheet"
       href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
     />
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{% static 'css/estilos.css' %}"
+      />
     <script>
     $(document).ready(function () {
         $("#periodo_matricula").change(function () {
@@ -47,8 +55,8 @@
 
   </head>
   <body>
-    <div class="container">
-      <h1>Generar Boletas de Matrícula</h1>
+    <div class="container mt-4">
+      <h1>GENERAR BOLETAS DE MATRÍCULA</h1>
 
       <form method="post" action="{% url 'generar_reporte_boleta_matricula' %}" class="mb-3">
         {% csrf_token %}
@@ -77,10 +85,10 @@
           </select>
         </div>
 
-        <button type="submit" class="btn btn-primary">Generar boletas</button>
+        <button type="submit" class="btn btn-primary fondoAzul">Generar boletas</button>
       </form>
 
-      <div class="container">
+      <div class="container-fluit">
         <header class="clearfix">
           <div id="logo">
             <img src="{% static 'pfimapp/img/logo.png' %}" alt="Mi imagen" />
@@ -114,11 +122,11 @@
         <tbody>
           {% for detalle in detalleAcademico %}
           <tr>
-            <td>{{ detalle.seccion.periodo.codigo }}</td>
-            <td>{{ detalle.seccion.curso.codigo }}</td>
-            <td>{{ detalle.seccion.curso.credito }}</td>
-            <td>{{ detalle.seccion.curso.nombre }}</td>
-            <td>{{ detalle.seccion.docente.usuario.nombre_completos }}</td>
+            <td class="small-font">{{ detalle.seccion.periodo.codigo }}</td>
+            <td class="small-font">{{ detalle.seccion.curso.codigo }}</td>
+            <td class="small-font">{{ detalle.seccion.curso.credito }}</td>
+            <td class="small-font">{{ detalle.seccion.curso.nombre }}</td>
+            <td class="small-font">{{ detalle.seccion.docente.usuario.nombre_completos }}</td>
             
             {% if detalle.retirado == 0 %}
             <td class="letraAzul small-font"><b>ESTUDIANTE</b></td>
@@ -136,13 +144,13 @@
         <!-- Resto del código HTML -->
 
         <div class="mt-4 mb-4">
-          <a href="{% url 'admin_dashboard' %}" class="btn btn-primary"
+          <a href="{% url 'admin_dashboard' %}" class="btn btn-primary fondoAzul"
             >Regresar a Dashboard</a
           >
 
           <a
             href="{% url 'generar_pdf_boleta_matricula' %}?periodo_id={{ periodo_id }}&alumno_id={{ alumno_id }}"
-            class="btn btn-dark"
+            class="btn btn-danger fondoRojo"
             >Descargar PDF</a
           >
         </div>

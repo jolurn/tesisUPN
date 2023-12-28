@@ -20,24 +20,19 @@ class CustomUserCreationForm(UserCreationForm):
     tipoDocumento = forms.ModelChoiceField(label='Tipo de Documento (*)',queryset=TipoDocumento.objects.all(), required=True, widget=forms.Select(attrs={'class': 'form-control required'}))
     numeroDocumento = forms.CharField(label='Número de Documento (*)',max_length=100, required=True, widget=forms.TextInput(attrs={'class': 'form-control required'}))
     numeroUbigeoNacimiento = forms.CharField(label='Número de ubigeo de nacimiento (*)',max_length=100, required=True, widget=forms.TextInput(attrs={'class': 'form-control required'}))
-    direccion = forms.CharField(label='Dirección (*)',max_length=200, required=True, widget=forms.TextInput(attrs={'class': 'form-control required'}))
-    codigoEgresadoUNI = forms.CharField(label='Código de Egresado UNI',max_length=20, required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    direccion = forms.CharField(label='Dirección (*)',max_length=200, required=True, widget=forms.TextInput(attrs={'class': 'form-control required'}))    
     primerNombre = forms.CharField(label='Primer Nombre (*)',max_length=100, required=True, widget=forms.TextInput(attrs={'class': 'form-control required'}))
     segundoNombre = forms.CharField(label='Segundo Nombre',max_length=100, required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
     apellidoPaterno = forms.CharField(label='Apellido Paterno (*)',max_length=100, required=True, widget=forms.TextInput(attrs={'class': 'form-control required'}))
     apellidoMaterno = forms.CharField(label='Apellido Materno (*)',max_length=100, required=True, widget=forms.TextInput(attrs={'class': 'form-control required'}))
     estadoCivil = forms.ModelChoiceField(label='Estado Civil (*)',queryset=EstadoCivil.objects.all(), required=True, widget=forms.Select(attrs={'class': 'form-control required'}))
-    correoUNI = forms.EmailField(label='Correo UNI',max_length=100, required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
-    gradoEstudio = forms.CharField(label='Grado Estudio (*)',max_length=200, required=True, widget=forms.TextInput(attrs={'class': 'form-control required'}))
-    universidadProcedencia = forms.CharField(label='Universidad de Procedencia (*)',max_length=200, required=True, widget=forms.TextInput(attrs={'class': 'form-control required'}))
-    telefono = forms.CharField(label='Celular (*)',max_length=15, required=True, widget=forms.TextInput(attrs={'class': 'form-control required'}))
-    maestria = forms.ModelChoiceField(label='Maestria que va llevar (*)',queryset=Maestria.objects.all(), required=True, widget=forms.Select(attrs={'class': 'form-control required'}))
-    sede = forms.ModelChoiceField(label='Sede donde va a estudiar (*)',queryset=Sede.objects.all(), required=True, widget=forms.Select(attrs={'class': 'form-control required mb-3'}))
+    correoUNI = forms.EmailField(label='Correo UNI',max_length=100, required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))     
+    telefono = forms.CharField(label='Celular (*)',max_length=15, required=True, widget=forms.TextInput(attrs={'class': 'form-control required'}))        
     fechaNacimiento = forms.DateField(label='Fecha de Nacimiento (*)',required=False, widget=forms.TextInput(attrs={'type': 'date', 'class': 'form-control'}))
 
     class Meta:
         model = CustomUser
-        fields = ('email','nacionalidad', 'tipoDocumento', 'numeroDocumento', 'numeroUbigeoNacimiento', 'direccion', 'codigoEgresadoUNI', 'primerNombre', 'segundoNombre', 'apellidoPaterno', 'apellidoMaterno', 'estadoCivil', 'fechaNacimiento', 'correoUNI','gradoEstudio', 'universidadProcedencia', 'telefono', 'maestria','sede')
+        fields = ('email','nacionalidad', 'tipoDocumento', 'numeroDocumento','numeroUbigeoNacimiento', 'direccion', 'primerNombre', 'segundoNombre', 'apellidoPaterno', 'apellidoMaterno', 'estadoCivil', 'fechaNacimiento','correoUNI', 'telefono','fechaNacimiento')
 
 
 class CustomUserForm(forms.ModelForm):
@@ -46,22 +41,17 @@ class CustomUserForm(forms.ModelForm):
     tipoDocumento = forms.ModelChoiceField(label='Tipo de Documento (*)',queryset=TipoDocumento.objects.all(), required=True, widget=forms.Select(attrs={'class': 'form-control required'}))
     numeroDocumento = forms.CharField(label='Número de Documento (*)',max_length=100, required=True, widget=forms.TextInput(attrs={'class': 'form-control required'}))
     numeroUbigeoNacimiento = forms.CharField(label='Número de ubigeo de nacimiento (*)',max_length=100, required=True, widget=forms.TextInput(attrs={'class': 'form-control required'}))
-    direccion = forms.CharField(label='Dirección (*)',max_length=200, required=True, widget=forms.TextInput(attrs={'class': 'form-control required'}))
-    codigoEgresadoUNI = forms.CharField(label='Código de Egresado UNI',max_length=20, required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    direccion = forms.CharField(label='Dirección (*)',max_length=200, required=True, widget=forms.TextInput(attrs={'class': 'form-control required'}))    
     primerNombre = forms.CharField(label='Primer Nombre (*)',max_length=100, required=True, widget=forms.TextInput(attrs={'class': 'form-control required'}))
     segundoNombre = forms.CharField(label='Segundo Nombre',max_length=100, required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
     apellidoPaterno = forms.CharField(label='Apellido Paterno (*)',max_length=100, required=True, widget=forms.TextInput(attrs={'class': 'form-control required'}))
     apellidoMaterno = forms.CharField(label='Apellido Materno (*)',max_length=100, required=True, widget=forms.TextInput(attrs={'class': 'form-control required'}))
     estadoCivil = forms.ModelChoiceField(label='Estado Civil (*)',queryset=EstadoCivil.objects.all(), required=True, widget=forms.Select(attrs={'class': 'form-control required'}))
-    correoUNI = forms.EmailField(label='Correo UNI',max_length=100, required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
-    gradoEstudio = forms.CharField(label='Grado Estudio (*)',max_length=200, required=True, widget=forms.TextInput(attrs={'class': 'form-control required'}))
-    universidadProcedencia = forms.CharField(label='Universidad de Procedencia (*)',max_length=200, required=True, widget=forms.TextInput(attrs={'class': 'form-control required'}))
-    telefono = forms.CharField(label='Celular (*)',max_length=15, required=True, widget=forms.TextInput(attrs={'class': 'form-control required'}))
-    maestria = forms.ModelChoiceField(label='Maestria que va llevar (*)',queryset=Maestria.objects.all(), required=True, widget=forms.Select(attrs={'class': 'form-control required'}))
-    sede = forms.ModelChoiceField(label='Sede donde va a estudiar (*)',queryset=Sede.objects.all(), required=True, widget=forms.Select(attrs={'class': 'form-control required mb-3'}))
+    correoUNI = forms.EmailField(label='Correo UNI',max_length=100, required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))     
+    telefono = forms.CharField(label='Celular (*)',max_length=15, required=True, widget=forms.TextInput(attrs={'class': 'form-control required'}))        
     fechaNacimiento = forms.DateField(label='Fecha de Nacimiento (*)',required=False, widget=forms.TextInput(attrs={'type': 'date', 'class': 'form-control'}))
 
     class Meta:
         model = CustomUser
-        fields = ('email','nacionalidad', 'tipoDocumento', 'numeroDocumento', 'numeroUbigeoNacimiento', 'direccion', 'codigoEgresadoUNI', 'primerNombre', 'segundoNombre', 'apellidoPaterno', 'apellidoMaterno', 'estadoCivil', 'fechaNacimiento', 'correoUNI','gradoEstudio', 'universidadProcedencia', 'telefono', 'maestria','sede')
+        fields = ('email','nacionalidad', 'tipoDocumento', 'numeroDocumento','numeroUbigeoNacimiento', 'direccion', 'primerNombre', 'segundoNombre', 'apellidoPaterno', 'apellidoMaterno', 'estadoCivil', 'fechaNacimiento','correoUNI', 'telefono','fechaNacimiento')
 

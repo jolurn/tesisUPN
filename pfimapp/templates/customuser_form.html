@@ -12,18 +12,14 @@
             <h1>Información del Usuario</h1>
             <p>Nombre: {{ user.nombre_completos }}</p>
             <p>Correo Electrónico: {{ user.email }}</p>
-            <p>Correo Electrónico UNI: {{ user.correoUNI }}</p>
-            <p>Grado de Estudio: {{ user.gradoEstudio }}</p>
-            <p>Universidad de Procedencia: {{ user.universidadProcedencia }}</p>
-            <p>Maestría: {{ user.maestria }}</p>
-            <p>sede: {{ user.sede }}</p>
+            {% comment %} <p>Correo Electrónico UNI: {% if user.correoUNI == None  %} ... {% else %} {{ user.correoUNI }} {% endif%}</p>             {% endcomment %}
         </div>
         <div class="col-lg-8 mb-5 mt-4">
             <h2>Editar Información del Usuario</h2>
             <form method="POST">
                 {% csrf_token %}
                 {{ form.as_p }}
-                <button type="submit" class="btn btn-primary">Guardar</button>
+                <button type="submit" class="btn btn-primary fondoAzul">Guardar</button>
             </form>
         </div>
     </div>

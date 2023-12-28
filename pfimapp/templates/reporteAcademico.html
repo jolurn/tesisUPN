@@ -37,10 +37,9 @@
             <th><b>CURSO</b></th>
             <th><b>CREDITO</b></th>
             <th><b>DOCENTE</b></th>
-            <th><b>P TRABAJOS</b></th>
-            <th><b>EXAMEN P</b></th>
-            <th><b>EXAMEN F</b></th>
-            <th><b>PROMEDIO F</b></th>
+            {% for calificacion in reporteAcademicos.0.calificacion_set.all %}
+              <th class="small-font"><b>{{ calificacion.definicionCalificacion.nombre|upper }}</b></th>
+            {% endfor %}
             <th><b>ESTADO</b></th>
           </tr>
         </thead>
@@ -52,31 +51,17 @@
             <td>{{ detalle.seccion.curso.nombre }}</td>
             <td>{{ detalle.seccion.curso.credito }}</td>
             <td>{{ detalle.seccion.docente.usuario.nombre_completos }}</td>
-            {% if detalle.promedioTrabajos >= 12 %}
-            <td class="letraAzul"><b>{{ detalle.promedioTrabajos }}</b></td>
-            {% else %}
-            <td class="letraRoja">
-              <b>{{ detalle.promedioTrabajos }}</b>
+            {% for calificacion in detalle.calificacion_set.all %}
+            <td class="small-font">
+              {% if calificacion.nota >= 12 %}
+                <b class="letraAzul">{{ calificacion.nota }}</b>
+              {% elif calificacion.nota is None %}
+                <b class="letraRoja">NSP</b>
+              {% else %}
+                <b class="letraRoja">{{ calificacion.nota }}</b>
+              {% endif %}
             </td>
-            {% endif %} {% if detalle.examenParcial >= 12 %}
-            <td class="letraAzul"><b>{{ detalle.examenParcial }}</b></td>
-            {% else %}
-            <td class="letraRoja">
-              <b>{{ detalle.examenParcial }}</b>
-            </td>
-            {% endif %} {% if detalle.examenFinal >= 12 %}
-            <td class="letraAzul"><b>{{ detalle.examenFinal }}</b></td>
-            {% else %}
-            <td class="letraRoja">
-              <b>{{ detalle.examenFinal }}</b>
-            </td>
-            {% endif %} {% if detalle.promedioFinal >= 12 %}
-            <td class="letraAzul"><b>{{ detalle.promedioFinal }}</b></td>
-            {% else %}
-            <td class="letraRoja">
-              <b>{{ detalle.promedioFinal }}</b>
-            </td>
-            {% endif %} {% if detalle.retirado == 0 %}
+            {% endfor %} {% if detalle.retirado == 0 %}
             <td class="letraAzul"><b> ESTUDIANTE</b></td>
             {% else %}
             <td class="letraRoja">
@@ -106,7 +91,7 @@
   <br />
 
    <div class="container-fluid mb-5">
-    <a href="{% url 'generar-pdf' %}" class="btn btn-primary">Descargar PDF <svg xmlns="http://www.w3.org/2000/svg"
+    <a href="{% url 'generar-pdf' %}" class="btn btn-danger fondoRojo">Descargar PDF <svg xmlns="http://www.w3.org/2000/svg"
         width="16" height="16" fill="currentColor" class="bi bi-file-earmark-arrow-down" viewBox="0 0 16 16">
         <path
           d="M8.5 6.5a.5.5 0 0 0-1 0v3.793L6.354 9.146a.5.5 0 1 0-.708.708l2 2a.5.5 0 0 0 .708 0l2-2a.5.5 0 0 0-.708-.708L8.5 10.293V6.5z" />

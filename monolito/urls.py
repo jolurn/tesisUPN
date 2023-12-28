@@ -40,7 +40,7 @@ urlpatterns = [
     path('reporteMatricula/', views.reporteMatricula, name='reporteMatricula'),  
     path('reporteAcademico/', views.reporteAcademico, name='reporteAcademico'),  
     path('reporteEconomico/', views.reporteEconomico, name='reporteEconomico'),  
-    path('logout/', views.signout, name='logount'),
+    path('logout/', views.signout, name='logount'),    
     path('change-password/', views.CustomPasswordChangeView.as_view(), name='password_change'),
     path('signin/', LoginView.as_view(template_name='signin.html'), name='signin'),
     
