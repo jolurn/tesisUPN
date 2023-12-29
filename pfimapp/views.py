@@ -96,7 +96,7 @@ def docente_login(request):
 
         if user is not None:
             try:
-                docente = Docente.objects.get(usuario=user)
+                docentes = Docente.objects.filter(usuario=user).first()
                 # Si el usuario autenticado es un docente, permitir el inicio de sesión
                 login(request, user)
                 # Redirigir a la página para seleccionar opciones antes de cargar calificaciones
@@ -117,7 +117,7 @@ def cargar_calificaciones(request):
 
     try:
         # Obtener el docente relacionado con el usuario
-        docente = Docente.objects.get(usuario=usuario_docente)
+        docente = Docente.objects.filter(usuario=usuario_docente).first()
 
         # Obtener las secciones relacionadas con el docente
         secciones_docente = Seccion.objects.filter(docente=docente)
@@ -146,11 +146,11 @@ def obtener_maestrias_y_cursos(request):
 
         try:
             # Obtener el docente relacionado con el usuario
-            docente = Docente.objects.get(usuario=usuario_docente)
-
+            # docente = Docente.objects.filter(usuario=usuario_docente)
+            
             # Obtener las secciones relacionadas con el docente para el periodo seleccionado
             secciones = Seccion.objects.filter(
-                docente=docente,
+                docente__usuario=usuario_docente,
                 periodo__id=periodo_id
             ).distinct()
 

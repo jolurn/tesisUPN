@@ -289,12 +289,12 @@ class DetalleMatriculaAdmin(admin.TabularInline):
 
 @admin.register(Matricula)
 class MatriculaAdmin(admin.ModelAdmin):
-    search_fields = ['alumno__usuario__apellidoPaterno', 'alumno__usuario__numeroDocumento', 'get_periodo']
+    search_fields = ['alumno__usuario__apellidoPaterno', 'alumno__usuario__numeroDocumento', 'seccion__periodo__codigo']
     autocomplete_fields = ['alumno',]
     inlines = [DetalleMatriculaAdmin, ]
     exclude = ('fechaRegistro', 'fechaModificado', 'usuarioPosgradoFIM', 'ipUsuario')
     readonly_fields = ('fechaRegistro', 'fechaModificado', 'usuarioPosgradoFIM', 'ipUsuario')
-    list_display = ('alumno', 'get_periodo', 'estado', 'fechaRegistro')
+    list_display = ('alumno','get_periodo', 'estado', 'fechaRegistro')
     filter_horizontal = ['seccion']
    
     def save_model(self, request, obj, form, change):
@@ -302,4 +302,11 @@ class MatriculaAdmin(admin.ModelAdmin):
         if not change:
             obj.usuarioPosgradoFIM = f"{request.user.apellidoPaterno} {request.user.apellidoMaterno} {request.user.primerNombre}"
         super().save_model(request, obj, form, change)
+
+    def get_periodo(self, obj):
+        # Esta función es para mostrar el periodo en la lista, pero no es utilizado para la búsqueda.
+        return obj.seccion.first().periodo.codigo if obj.seccion.exists() else None
+
+    get_periodo.admin_order_field = 'seccion__periodo__codigo'
+    get_periodo.short_description = 'Periodo'
 

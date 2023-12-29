@@ -357,8 +357,8 @@ class Matricula(models.Model):
     ipUsuario = models.CharField(null=True, default=s.getsockname()[0], blank=True, max_length=100)
     usuarioPosgradoFIM = models.CharField(null=True, blank=True, max_length=200)
 
-    def get_periodo(self):
-        return self.seccion.first().periodo.codigo if self.seccion.exists() else None
+    # def get_periodo(self):
+    #     return self.seccion.first().periodo.codigo if self.seccion.exists() else None
     
     def nombre_completo(self):
         
