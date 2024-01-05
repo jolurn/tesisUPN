@@ -414,9 +414,10 @@ class DetalleMatricula(models.Model):
         verbose_name_plural = "Detalle de Matriculas"
 
 class Calificacion(models.Model):
+    
     detalle_matricula = models.ForeignKey(DetalleMatricula, on_delete=models.CASCADE)
     definicionCalificacion = models.ForeignKey(DefinicionCalificacion, on_delete=models.CASCADE)
-    nota = models.FloatField(null=True)     
+    nota = models.FloatField(null=True, blank=True)  
     fecha_calificacion = models.DateField(default=timezone.now)
     
     

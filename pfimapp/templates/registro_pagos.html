@@ -79,21 +79,21 @@
 
         <button type="submit" class="btn btn-primary fondoAzul">Generar reporte</button>
       </form>
-      <div class="container-fluit">
-        <header class="clearfix">
-          <div id="logo">
-            <img src="{% static 'pfimapp/img/logo.png' %}" alt="Mi imagen" />
-          </div>
-          <h2 class="mt-3">REPORTE DE PAGOS</h2>
-          <div id="project">
-            {% if alumno_id %}
-            <div><span>ALUMNO :</span> {{ alumnos_pagos.0|upper }}</div>
-            {% else %}
-            <span>ALUMNO :</span>
-            {% endif %}
-          </div>
-        </header>
-      </div>
+      
+      <header class="clearfix">
+        <div id="logo">
+          <img src="{% static 'pfimapp/img/logo.png' %}" alt="Mi imagen" />
+        </div>
+        <h2 class="mt-3">REPORTE DE PAGOS</h2>
+        <div id="project">
+          {% if alumno_id %}
+          <div><span>ALUMNO :</span> {{ alumnos_pagos.0|upper }}</div>
+          {% else %}
+          <span>ALUMNO :</span>
+          {% endif %}
+        </div>
+      </header>
+      
       <!-- Resto del código HTML -->
 
       {% if resultados_disponibles %}

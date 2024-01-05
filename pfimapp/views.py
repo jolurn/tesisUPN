@@ -581,32 +581,32 @@ from django.shortcuts import render
 from .models import Seccion, DetalleMatricula, DefinicionCalificacion, Calificacion
 
 def editar_notas(request, seccion_id):
-    
     seccion = Seccion.objects.get(pk=seccion_id)
-    alumnos = seccion.matricula_set.all()
-    
+    alumnos = seccion.matricula_set.all().order_by('alumno__usuario__apellidoPaterno', 'alumno__usuario__primerNombre')
     definiciones = DefinicionCalificacion.objects.filter(seccion=seccion)
 
     if request.method == 'POST':
         for alumno in alumnos:
             for definicion in definiciones:
-                calificacion, created = Calificacion.objects.get_or_create(
-                    detalle_matricula=DetalleMatricula.objects.get(matricula=alumno, seccion=seccion),
-                    definicionCalificacion=definicion
-                )
-                calificacion.nota = request.POST.get(f'alumno_{alumno.id}_definicion_{definicion.id}')
-                calificacion.save()
+                nota_str = request.POST.get(f'alumno_{alumno.id}_definicion_{definicion.id}')
+                if nota_str:
+                    try:
+                        nota = float(nota_str)
+                    except ValueError:
+                        nota = None
+                    calificacion, created = Calificacion.objects.get_or_create(
+                        detalle_matricula=DetalleMatricula.objects.get(matricula=alumno, seccion=seccion),
+                        definicionCalificacion=definicion
+                    )
+                    calificacion.nota = nota
+                    calificacion.save()
 
-            # Calcular notas finales
-            # for alumno in alumnos:
-            #     detalle_matricula = DetalleMatricula.objects.get(matricula=alumno, seccion=seccion)
-            #     detalle_matricula.calcular_nota_final()
-            
     return render(request, 'editar_nota.html', {
         'seccion': seccion,
         'alumnos': alumnos,
         'definiciones': definiciones,
     })
+
 
 # Esta vista procesará las actualizaciones de calificaciones vía AJAX
 def actualizar_calificacion(request):
